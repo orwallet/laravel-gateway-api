@@ -51,6 +51,7 @@ class Gateway
     private function client(): PendingRequest
     {
         return Http::withHeaders([
+            "Accept" => "application/json",
             "X-GATEWAY-KEY" => $this->public_key,
             "X-GATEWAY-SECRET" => $this->digest()
         ]);
