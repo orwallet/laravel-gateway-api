@@ -76,7 +76,7 @@ Gateway::attachCustomer([...customer_object])->createWithdrawalIntent([..intent_
 | `amount`                  | `float`  | amount to be deposited                                                                        | ✅                                            |
 | `redirect_url`            | `string` | redirect url after the transaction has been completed                                         | ✅                                            |
 | `merchant_account_number` | `string` | the merchants account number from OWL                                                         | ✅ if third party solution is Oriental Wallet |
-| `merchant_account_id`     | `string` | the merchants account id from OWL                                                             | ✅ if third party solution is Oriental Wallet |
+| `mid`                     | `string` | the merchant's mid                                                                            | ✅ if third party solution is Oriental Wallet |
 | `merchant_email`          | `string` | the merchants email from OWL                                                                  | ✅ if third party solution is Oriental Wallet |
 | `note`                    | `string` | description of the transactions                                                               | ❌ if third party solution is Oriental Wallet |
 
@@ -136,5 +136,5 @@ For Oriental Wallet withdrawals the following key pair values are required.
 | :---------------------------- | :------- | :------------------------------ | :-------- |
 | `receiver_individual_account` | `string` | the receiver individual account | ✅        |
 | `merchant_account_number`     | `string` | the merchants account number    | ✅        |
-| `merchant_account_id`         | `string` | the merchants account id        | ✅        |
+| `mid`                         | `string` | the merchant's mid              | ✅        |
 | `merchant_email`              | `string` | the merchants email             | ✅        |
