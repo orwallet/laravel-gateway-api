@@ -2,9 +2,8 @@
 
 namespace Btph\GatewaySdk;
 
-use Illuminate\Http\Client\PendingRequest;
-use Illuminate\Http\Client\Response;
-use Illuminate\Support\Facades\Http;
+use Exception;
+use GuzzleHttp\Client;
 
 class Gateway
 {
@@ -43,43 +42,14 @@ class Gateway
         $this->secret_key = config("gateway.SECRET_KEY");
     }
 
-    /**
-     * Undocumented function
-     *
-     * @return PendingRequest
-     */
-    private function client(): PendingRequest
+    public function getAuthHeaders()
     {
-        return Http::withHeaders([
+        return [
             "Accept" => "application/json",
+            "Content-Type" => "application/json",
             "X-GATEWAY-KEY" => $this->public_key,
-            "X-GATEWAY-SECRET" => $this->digest()
-        ]);
-    }
-
-    /**
-     * Undocumented function
-     *
-     * @param string $url
-     * @param array $intent
-     * @return Response
-     */
-    private function request(string $url, array $intent): Response
-    {
-        return $this->client()->post($this->api_url . $url, [
-            "customer" => $this->customer,
-            "details" => $intent,
-        ]);
-    }
-
-    /**
-     * Undocumented function
-     *
-     * @return string
-     */
-    private function digest(): string
-    {
-        return md5($this->secret_key . $this->public_key);
+            "X-GATEWAY-SECRET" => md5($this->secret_key . $this->public_key)
+        ];
     }
 
     /**
@@ -95,6 +65,32 @@ class Gateway
         return $this;
     }
 
+    private function request(string $url, array $data): array
+    {
+        $payload = [];
+
+        try {
+            $response = (new Client())->request("POST", $this->api_url . $url, [
+                "headers" => $this->getAuthHeaders(),
+                "json" => $data
+            ]);
+            $payload = $response->getBody();
+        } catch (Exception $e) {
+            if (!method_exists($e, "getResponse")) {
+                throw $e;
+            }
+
+            $response = $e->getResponse();
+
+            if (!method_exists($response, "getBody")) {
+                throw $e;
+            }
+            $payload = $response->getBody();
+        }
+
+        return json_decode($payload, true);
+    }
+
     /**
      * Undocumented function
      *
@@ -103,7 +99,10 @@ class Gateway
      */
     public function createWithdrawalIntent(array $intent): array
     {
-        return $this->request("/withdraw/intent", $intent)->json();
+        return $this->request("/withdraw/intent",  [
+            "customer" => $this->customer,
+            "details" => $intent
+        ]);
     }
 
     /**
@@ -114,7 +113,10 @@ class Gateway
      */
     public function createDepositIntent(array $intent): array
     {
-        return $this->request("/deposit/intent", $intent)->json();
+        return $this->request("/deposit/intent",  [
+            "customer" => $this->customer,
+            "details" => $intent
+        ]);
     }
 
     /**
@@ -126,6 +128,6 @@ class Gateway
      */
     public function processWithdrawalIntent(int $transaction_number, array $details): array
     {
-        return $this->request("/withdraw/{$transaction_number}", $details)->json();
+        return $this->request("/withdraw/{$transaction_number}", $details);
     }
 }
