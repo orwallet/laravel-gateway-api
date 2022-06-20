@@ -1,8 +1,6 @@
 {
     "name": "btph/gateway-sdk",
-    "require": {
-        "guzzlehttp/guzzle": "^6.5"
-    },
+    "require": {},
     "license": "MIT",
     "autoload": {
         "psr-4": {
