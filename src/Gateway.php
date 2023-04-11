@@ -64,12 +64,9 @@ class Gateway
      * @param array $intent
      * @return Response
      */
-    private function request(string $url, array $intent): Response
+    private function request(string $url, array $details): Response
     {
-        return $this->client()->post($this->api_url . $url, [
-            "customer" => $this->customer,
-            "details" => $intent,
-        ]);
+        return $this->client()->post($this->api_url . $url, $details);
     }
 
     /**
@@ -103,7 +100,10 @@ class Gateway
      */
     public function createWithdrawalIntent(array $intent): array
     {
-        return $this->request("/withdraw/intent", $intent)->json();
+        return $this->request("/withdraw/intent", [
+            "customer" => $this->customer,
+            "details" => $intent,
+        ])->json();
     }
 
     /**
@@ -114,7 +114,10 @@ class Gateway
      */
     public function createDepositIntent(array $intent): array
     {
-        return $this->request("/deposit/intent", $intent)->json();
+        return $this->request("/deposit/intent", [
+            "customer" => $this->customer,
+            "details" => $intent,
+        ])->json();
     }
 
     /**
