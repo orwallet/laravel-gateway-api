@@ -5,6 +5,7 @@ namespace Btph\GatewaySdk;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Arr;
 
 class Gateway
 {
@@ -48,12 +49,12 @@ class Gateway
      *
      * @return PendingRequest
      */
-    private function client(): PendingRequest
+    private function client(string $reference_no): PendingRequest
     {
         return Http::withHeaders([
             "Accept" => "application/json",
             "X-GATEWAY-KEY" => $this->public_key,
-            "X-GATEWAY-SECRET" => $this->digest()
+            "X-GATEWAY-SECRET" => $this->digest($reference_no)
         ]);
     }
 
@@ -66,7 +67,7 @@ class Gateway
      */
     private function request(string $url, array $details): Response
     {
-        return $this->client()->post($this->api_url . $url, $details);
+        return $this->client(Arr::get($details, "details.reference_no"))->post($this->api_url . $url, $details);
     }
 
     /**
@@ -74,9 +75,9 @@ class Gateway
      *
      * @return string
      */
-    private function digest(): string
+    private function digest(string $reference_no): string
     {
-        return md5($this->secret_key . $this->public_key);
+        return hash_hmac("sha256", $this->public_key . $reference_no, $this->secret_key);
     }
 
     /**
